@@ -1,0 +1,53 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Send SMS{% endblock %} · SMS Sender</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="{% static 'sms_app/css/style.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{% url 'sms_app:send' %}">
+        <span class="brand-mark" aria-hidden="true"></span>SMS Sender
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a href="{% url 'sms_app:send' %}"{% if request.resolver_match.url_name == 'send' %} aria-current="page"{% endif %}>Send SMS</a>
+        <a href="{% url 'sms_app:history' %}"{% if request.resolver_match.url_name == 'history' %} aria-current="page"{% endif %}>History</a>
+      </nav>
+    </div>
+  </header>
+
+  {% if test_mode %}
+  <div class="test-banner">
+    <div class="container">
+      <strong>Test mode is on.</strong> Messages are saved but not sent.
+      Set <code>SMS_PROVIDER=smsgate</code> in <code>.env</code> to send real SMS.
+    </div>
+  </div>
+  {% endif %}
+
+  <main class="container main">
+    {% if messages %}
+    <div class="alerts">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}" role="{% if message.level >= 40 %}alert{% else %}status{% endif %}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">IT 120 · Integrative Programming and Technologies · Built with Django and SMS Gateway</div>
+  </footer>
+
+  <script src="{% static 'sms_app/js/keep-scroll.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

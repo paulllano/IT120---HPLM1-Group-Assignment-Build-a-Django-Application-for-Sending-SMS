@@ -1,0 +1,85 @@
+{% extends 'sms_app/base.html' %}
+{% load static sms_extras %}
+
+{% block title %}History{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>Message history</h1>
+  <p class="lede">Your messages, grouped by phone number like a messaging app. Pick a number to see its conversation.</p>
+</div>
+
+<section class="card status-guide" aria-labelledby="status-guide-title">
+  <h2 class="visually-hidden" id="status-guide-title">What the statuses mean</h2>
+  {% for value, label, count, meaning in statuses %}
+  <div class="status-item">
+    <div class="status-item-head">
+      <span class="pill pill-{{ value }}">{{ label }}</span>
+      <span class="status-count">{{ count }}</span>
+    </div>
+    <p>{{ meaning }}</p>
+  </div>
+  {% endfor %}
+</section>
+
+{% if conversations %}
+<div class="card inbox">
+  <nav aria-label="Conversations">
+    <ul class="convo-list">
+      {% for convo in conversations %}
+      <li>
+        <a class="convo" href="?to={{ convo.recipient }}"{% if convo.recipient == selected %} aria-current="true"{% endif %}>
+          <span class="convo-number">{{ convo.recipient|phone }}</span>
+          <span class="convo-count">{{ convo.total }}</span>
+          <span class="convo-last">
+            <span class="dot dot-{{ convo.last_status }}" aria-hidden="true"></span>
+            <span class="convo-last-text">{{ convo.last_body }}</span>
+          </span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </nav>
+
+  <section class="thread" aria-labelledby="thread-title">
+    <header class="thread-head">
+      <div>
+        <h2 class="thread-number" id="thread-title">{{ selected|phone }}</h2>
+        <p class="thread-sub">{{ thread|length }} message{{ thread|length|pluralize }}</p>
+      </div>
+      <a class="btn-reply" href="{% url 'sms_app:send' %}?to={{ selected }}">New message</a>
+    </header>
+
+    <div class="thread-body" id="thread-body">
+      {% for sms in thread %}
+      <article class="msg{% if sms.status == 'failed' %} is-failed{% endif %}">
+        <div class="msg-bubble">{{ sms.body }}</div>
+        <div class="msg-meta">
+          <time datetime="{{ sms.created_at|date:'c' }}">{{ sms.created_at|date:"M j, g:i A" }}</time>
+          {% if sms.provider == 'console' %}<span class="tag">Test</span>{% elif sms.network %}<span>{{ sms.network }}</span>{% endif %}
+          <span class="pill pill-{{ sms.status }}">{{ sms.get_status_display }}</span>
+        </div>
+        {% if sms.error_message %}<p class="msg-error">{{ sms.error_message }}</p>{% endif %}
+        {% if sms.can_refresh %}
+        <form method="post" action="{% url 'sms_app:refresh_status' sms.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" class="btn btn-small">Check status</button>
+        </form>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% else %}
+<div class="card empty">
+  <p>No messages yet. Messages you send will appear here, grouped by phone number.</p>
+  <a class="btn btn-primary" href="{% url 'sms_app:send' %}">Send your first SMS</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'sms_app/js/history.js' %}"></script>
+{% endblock %}

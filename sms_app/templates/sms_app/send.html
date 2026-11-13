@@ -1,0 +1,77 @@
+{% extends 'sms_app/base.html' %}
+{% load static %}
+
+{% block title %}Send SMS{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>Send an SMS</h1>
+  <p class="lede">Enter a Philippine mobile number and your message. The app sends it through SMS Gateway and tells you what happened.</p>
+</div>
+
+<div class="compose-grid">
+  <form method="post" class="card compose" id="sms-form" novalidate>
+    {% csrf_token %}
+
+    {% if form.errors %}
+    <div class="alert alert-danger" role="alert">
+      Please fix the highlighted {{ form.errors|length|pluralize:"field,fields" }} below.
+    </div>
+    {% endif %}
+
+    <div class="field">
+      <label for="id_recipient">{{ form.recipient.label }}</label>
+      <input type="text" name="recipient" id="id_recipient"
+             value="{{ form.recipient.value|default:'' }}"
+             class="input input-mono{% if form.recipient.errors %} is-invalid{% endif %}"
+             placeholder="09171234567" inputmode="tel" autocomplete="tel" maxlength="20"
+             aria-describedby="recipient-help{% if form.recipient.errors %} recipient-error{% endif %}"
+             {% if form.recipient.errors %}aria-invalid="true"{% endif %}>
+      <p class="hint" id="recipient-help">Philippine mobile number, e.g. 09171234567 or +639171234567.</p>
+      {% if form.recipient.errors %}
+      <p class="field-error" id="recipient-error">{{ form.recipient.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <div class="field">
+      <label for="id_message">{{ form.message.label }}</label>
+      <textarea name="message" id="id_message" rows="6" maxlength="{{ max_length }}"
+                class="input{% if form.message.errors %} is-invalid{% endif %}"
+                placeholder="Type your message…"
+                aria-describedby="message-counter{% if form.message.errors %} message-error{% endif %}"
+                {% if form.message.errors %}aria-invalid="true"{% endif %}>{{ form.message.value|default:'' }}</textarea>
+      <div class="counter" id="message-counter" aria-live="polite">
+        <span id="char-count">0 / 160 characters</span>
+        <span id="sms-parts">1 SMS</span>
+      </div>
+      <p class="hint" id="unicode-note" hidden>Your message has special characters such as emoji, so each SMS part holds fewer characters.</p>
+      {% if form.message.errors %}
+      <p class="field-error" id="message-error">{{ form.message.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="btn btn-primary" id="send-btn">Send SMS</button>
+      <button type="button" class="btn btn-ghost" id="clear-btn">Clear</button>
+    </div>
+  </form>
+
+  <aside class="card preview" aria-labelledby="preview-title">
+    <h2 class="label" id="preview-title">Preview</h2>
+    <div class="phone">
+      <div class="phone-top">
+        <span class="phone-sender">{{ sender_name }}</span>
+        <span class="phone-to" id="preview-to">To: no number yet</span>
+      </div>
+      <div class="phone-screen">
+        <div class="bubble is-empty" id="preview-bubble">Your message will appear here.</div>
+      </div>
+    </div>
+    <p class="hint">This is how the recipient will see it. Messages over 160 characters arrive as several parts joined together.</p>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'sms_app/js/compose.js' %}"></script>
+{% endblock %}
