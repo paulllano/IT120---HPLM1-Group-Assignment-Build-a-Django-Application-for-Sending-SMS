@@ -29,7 +29,7 @@ Switching between live sending (`smsgate`) and test mode (`console`) means chang
 
 | Member | Role | Responsibilities |
 |---|---|---|
-| **Marriane B. Barbin** | Group Leader | Django project setup, views, URL routing and application logic |
+| **Marianne B. Barbin** | Group Leader | Django project setup, views, URL routing and application logic |
 | **Jurls Earl Miguel B. Velasco** | Member | User interface, templates and CSS, forms, input validation and user feedback |
 | **Paul Matthew F. Llano** | Member | SMS Gateway service integration, automated and manual testing, documentation and demonstration video |
 
